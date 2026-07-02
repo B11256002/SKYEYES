@@ -7,48 +7,67 @@ class Display:
     def __init__(self, window_name):
         self.window_name = window_name
 
+    def draw_boundary(self, frame, points):
+        pts = np.array(points, dtype=np.int32).reshape((-1, 1, 2))
+
+        overlay = frame.copy()
+        cv2.fillPoly(overlay, [pts], color=(0, 180, 255))
+        cv2.addWeighted(overlay, 0.18, frame, 0.82, 0, frame)
+
+        cv2.polylines(
+            frame,
+            [pts],
+            isClosed=True,
+            color=(0, 180, 255),
+            thickness=2
+        )
+
+        cv2.putText(
+            frame,
+            "BOUNDARY",
+            tuple(pts[0][0]),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.6,
+            (0, 180, 255),
+            2
+        )
+
     def draw(self, frame, detections):
-
         for det in detections:
+            pts = np.array(det.corners, dtype=np.int32).reshape((-1, 1, 2))
+            color = (0, 0, 255) if det.inside_boundary else (0, 255, 0)
+            status = "INSIDE" if det.inside_boundary else "OUTSIDE"
 
-            # 四個角點
-            pts = np.array(det.corners, dtype=np.int32)
-            pts = pts.reshape((-1, 1, 2))
-
-            # 畫 OBB
             cv2.polylines(
                 frame,
                 [pts],
                 isClosed=True,
-                color=(255, 255, 0),      # 青色
+                color=color,
                 thickness=2
             )
 
-            # 中心點
             cv2.circle(
                 frame,
                 det.center,
                 4,
-                (0, 0, 255),              # 紅色
+                color,
                 -1
             )
 
-            # 標籤
-            x = pts[0][0][0]
-            y = pts[0][0][1] - 10
+            x = int(pts[0][0][0])
+            y = int(pts[0][0][1]) - 10
 
             cv2.putText(
                 frame,
-                f"{det.label} {det.confidence:.2f}",
+                f"{det.label} {det.confidence:.2f} {status}",
                 (x, y),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.6,
-                (0, 255, 255),
+                color,
                 2
             )
 
     def show(self, frame, fps):
-
         cv2.putText(
             frame,
             f"FPS : {fps:.2f}",
@@ -62,5 +81,4 @@ class Display:
         cv2.imshow(self.window_name, frame)
 
     def close(self):
-
         cv2.destroyAllWindows()

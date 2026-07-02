@@ -5,19 +5,23 @@ from camera.receiver import CameraReceiver
 from ui.display import Display
 from utils.fps import FPS
 from detection.yolo import YOLODetector
+from boundary.manager import BoundaryManager
 
 
 def main():
 
     camera = CameraReceiver(CAMERA_SOURCE)
 
-    detector = YOLODetector(MODEL_PATH)
+    detector = YOLODetector(MODEL_PATH, CONFIDENCE)
 
     display = Display(WINDOW_NAME)
 
+    boundary = BoundaryManager(BOUNDARY_POINTS)
+
     fps_counter = FPS()
 
-    print(CAMERA_SOURCE)
+    print(f"Camera source: {CAMERA_SOURCE}")
+    print(f"Model path: {MODEL_PATH}")
 
     while True:
 
@@ -28,10 +32,15 @@ def main():
 
         detections = detector.detect(frame)
 
+        detections = boundary.update(detections)
+
         for det in detections:
-            print(det)
+            if det.inside_boundary:
+                print(f"Boundary event: {det.label} at {det.center}")
 
         fps = fps_counter.get()
+
+        display.draw_boundary(frame, boundary.points)
 
         display.draw(frame, detections)
 
@@ -39,11 +48,6 @@ def main():
 
         if cv2.waitKey(1) == ord("q"):
             break
-
-        print(detections)
-
-       # print(f"Found {len(detections)} detections")
-       # print(f"Detection Count: {len(detections)}")
 
     camera.release()
 
