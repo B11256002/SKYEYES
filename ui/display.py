@@ -56,10 +56,14 @@ class Display:
 
             x = int(pts[0][0][0])
             y = int(pts[0][0][1]) - 10
+            track_label = ""
+
+            if det.tracked_id != -1:
+                track_label = f" ID {det.tracked_id}"
 
             cv2.putText(
                 frame,
-                f"{det.label} {det.confidence:.2f} {status}",
+                f"{det.label}{track_label} {det.confidence:.2f} {status}",
                 (x, y),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.6,

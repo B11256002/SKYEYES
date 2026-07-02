@@ -39,8 +39,13 @@ class AlarmManager:
         return f"{detection.label}:{detection.center}"
 
     def _create_event(self, detection, timestamp):
+        track_label = ""
+
+        if detection.tracked_id != -1:
+            track_label = f" ID {detection.tracked_id}"
+
         message = (
-            f"ALARM {detection.label} entered boundary "
+            f"ALARM {detection.label}{track_label} entered boundary "
             f"at {detection.center} ({detection.confidence:.2f})"
         )
 

@@ -10,7 +10,7 @@ The system receives real-time images from an ESP32-S3-CAM or a video source, per
 
 ## Current Version
 
-V0.6 ESP32 Communication
+V0.7 Object Tracking
 
 ## Current Features
 
@@ -25,6 +25,7 @@ V0.6 ESP32 Communication
 - ArUco marker landmark detection with marker ID and center point display
 - Boundary alarm events with cooldown and on-screen alert banner
 - ESP32 communication protocol with serial and mock modes
+- Centroid-based object tracking with stable detection IDs
 
 ## Development Roadmap
 
@@ -34,7 +35,7 @@ V0.6 ESP32 Communication
 - [x] V0.4 ArUco Landmark
 - [x] V0.5 Alarm Module
 - [x] V0.6 ESP32 Communication
-- [ ] V0.7 Object Tracking
+- [x] V0.7 Object Tracking
 - [ ] V0.8 Image Stabilization
 - [ ] V1.0 SKYEYES Release
 
@@ -118,3 +119,14 @@ Commands are sent as one-line JSON messages:
 ```
 
 In V0.6, alarm events send an `ALARM` command to the ESP32 communication layer. Future firmware can interpret this command to trigger buzzer, LED, or telemetry behavior.
+
+## Tracking Configuration
+
+V0.7 adds a lightweight centroid tracker. It assigns stable IDs to detections by matching each new detection to the nearest previous track with the same label:
+
+```python
+TRACKING_MAX_DISTANCE = 80
+TRACKING_MAX_MISSING = 10
+```
+
+Tracked detections display `ID n` on the frame. Alarm cooldown also uses `tracked_id`, so moving objects are handled more consistently than using center point alone. This is a simple tracker designed for the current video-only workflow; later versions can replace it with ByteTrack or DeepSORT if stronger tracking is needed.

@@ -52,6 +52,16 @@ class AlarmManagerTest(unittest.TestCase):
         self.assertEqual(second_events, [])
         self.assertEqual(len(third_events), 1)
 
+    def test_alarm_message_includes_tracked_id(self):
+        clock = FakeClock(100.0)
+        alarm = AlarmManager(cooldown_seconds=2.0, clock=clock)
+        detection = self._detection(inside_boundary=True)
+        detection.tracked_id = 3
+
+        events = alarm.update([detection])
+
+        self.assertIn("ID 3", events[0].message)
+
     def _detection(self, inside_boundary):
         return Detection(
             label="person",

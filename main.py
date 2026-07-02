@@ -10,6 +10,7 @@ from landmark.aruco import ArUcoLandmarkDetector
 from alarm.manager import AlarmManager
 from communication.factory import create_esp32_communicator
 from communication.protocol import make_command
+from tracking.centroid import CentroidTracker
 
 
 def main():
@@ -25,6 +26,8 @@ def main():
     landmark_detector = ArUcoLandmarkDetector(ARUCO_DICTIONARY)
 
     alarm_manager = AlarmManager(ALARM_COOLDOWN_SECONDS)
+
+    tracker = CentroidTracker(TRACKING_MAX_DISTANCE, TRACKING_MAX_MISSING)
 
     esp32 = create_esp32_communicator(
         ESP32_ENABLED,
@@ -48,6 +51,8 @@ def main():
             break
 
         detections = detector.detect(frame)
+
+        detections = tracker.update(detections)
 
         detections = boundary.update(detections)
 
