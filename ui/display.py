@@ -67,6 +67,41 @@ class Display:
                 2
             )
 
+    def draw_landmarks(self, frame, landmarks):
+        for landmark in landmarks:
+            pts = np.array(landmark.corners, dtype=np.int32).reshape((-1, 1, 2))
+
+            cv2.polylines(
+                frame,
+                [pts],
+                isClosed=True,
+                color=(255, 0, 0),
+                thickness=2
+            )
+
+            cv2.circle(
+                frame,
+                landmark.center,
+                4,
+                (255, 0, 0),
+                -1
+            )
+
+            label_position = (
+                int(landmark.center[0]) + 8,
+                int(landmark.center[1]) - 8
+            )
+
+            cv2.putText(
+                frame,
+                f"ID {landmark.marker_id}",
+                label_position,
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.6,
+                (255, 0, 0),
+                2
+            )
+
     def show(self, frame, fps):
         cv2.putText(
             frame,

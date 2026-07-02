@@ -10,7 +10,7 @@ The system receives real-time images from an ESP32-S3-CAM or a video source, per
 
 ## Current Version
 
-V0.3 Boundary Manager
+V0.4 ArUco Landmark Detection
 
 ## Current Features
 
@@ -21,13 +21,15 @@ V0.3 Boundary Manager
 - FPS calculation
 - OpenCV display with OBB, label, confidence, center point, and boundary status
 - Fixed polygon boundary manager
+- Configurable frame resizing for smaller display windows
+- ArUco marker landmark detection with marker ID and center point display
 
 ## Development Roadmap
 
 - [x] V0.1 Project Architecture
 - [x] V0.2 YOLOv8-OBB Detection
 - [x] V0.3 Boundary Detection
-- [ ] V0.4 ArUco Landmark
+- [x] V0.4 ArUco Landmark
 - [ ] V0.5 Alarm Module
 - [ ] V0.6 ESP32 Communication
 - [ ] V0.7 Object Tracking
@@ -48,3 +50,39 @@ BOUNDARY_POINTS = [
 ```
 
 A detection is marked as `inside_boundary=True` when its center point is inside the polygon.
+
+## Frame Size Configuration
+
+The video frame width is configured in `config.py`:
+
+```python
+FRAME_WIDTH = 960
+```
+
+Frames wider than this value are resized while preserving the original aspect ratio. Smaller frames are kept unchanged.
+
+## ArUco Landmark Configuration
+
+The ArUco dictionary is configured in `config.py`:
+
+```python
+ARUCO_DICTIONARY = "DICT_4X4_50"
+```
+
+Detected markers are converted into `Landmark` objects containing marker ID, four corners, and center point. V0.4 displays these markers on the frame; later versions can use them to adjust the boundary position dynamically.
+
+ArUco markers are not arbitrary black-and-white images. Each marker must match a specific ID inside a specific dictionary. This project currently uses `DICT_4X4_50`, so printed markers should be generated from the same dictionary.
+
+Generate the default test marker:
+
+```powershell
+python tools\generate_aruco.py --id 7 --size 800
+```
+
+The generated image is saved to:
+
+```text
+assets/aruco/aruco_dict_4x4_50_id_7.png
+```
+
+Print the image clearly on flat paper, keep the black border visible, and avoid cutting off the marker edge.

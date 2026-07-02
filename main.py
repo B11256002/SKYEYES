@@ -6,11 +6,12 @@ from ui.display import Display
 from utils.fps import FPS
 from detection.yolo import YOLODetector
 from boundary.manager import BoundaryManager
+from landmark.aruco import ArUcoLandmarkDetector
 
 
 def main():
 
-    camera = CameraReceiver(CAMERA_SOURCE)
+    camera = CameraReceiver(CAMERA_SOURCE, FRAME_WIDTH)
 
     detector = YOLODetector(MODEL_PATH, CONFIDENCE)
 
@@ -18,10 +19,13 @@ def main():
 
     boundary = BoundaryManager(BOUNDARY_POINTS)
 
+    landmark_detector = ArUcoLandmarkDetector(ARUCO_DICTIONARY)
+
     fps_counter = FPS()
 
     print(f"Camera source: {CAMERA_SOURCE}")
     print(f"Model path: {MODEL_PATH}")
+    print(f"Frame width: {FRAME_WIDTH}")
 
     while True:
 
@@ -34,6 +38,8 @@ def main():
 
         detections = boundary.update(detections)
 
+        landmarks = landmark_detector.detect(frame)
+
         for det in detections:
             if det.inside_boundary:
                 print(f"Boundary event: {det.label} at {det.center}")
@@ -41,6 +47,8 @@ def main():
         fps = fps_counter.get()
 
         display.draw_boundary(frame, boundary.points)
+
+        display.draw_landmarks(frame, landmarks)
 
         display.draw(frame, detections)
 
