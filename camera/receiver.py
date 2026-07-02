@@ -1,13 +1,15 @@
 import cv2
 
+
 class CameraReceiver:
 
     def __init__(self, source=0):
 
+        self.source = source
         self.cap = cv2.VideoCapture(source)
 
         if not self.cap.isOpened():
-            raise Exception("Camera Open Failed")
+            raise Exception(f"Cannot open source: {source}")
 
     def read(self):
 

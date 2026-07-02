@@ -10,5 +10,15 @@ venv/
 logs/
 
 models/
-
 *.pt
+
+videos/
+data/
+datasets/
+outputs/
+runs/
+
+*.mp4
+*.avi
+*.mov
+*.mkv
