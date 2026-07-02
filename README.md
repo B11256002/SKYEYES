@@ -10,7 +10,7 @@ The system receives real-time images from an ESP32-S3-CAM or a video source, per
 
 ## Current Version
 
-V0.4 ArUco Landmark Detection
+V0.5 Alarm Module
 
 ## Current Features
 
@@ -23,6 +23,7 @@ V0.4 ArUco Landmark Detection
 - Fixed polygon boundary manager
 - Configurable frame resizing for smaller display windows
 - ArUco marker landmark detection with marker ID and center point display
+- Boundary alarm events with cooldown and on-screen alert banner
 
 ## Development Roadmap
 
@@ -30,7 +31,7 @@ V0.4 ArUco Landmark Detection
 - [x] V0.2 YOLOv8-OBB Detection
 - [x] V0.3 Boundary Detection
 - [x] V0.4 ArUco Landmark
-- [ ] V0.5 Alarm Module
+- [x] V0.5 Alarm Module
 - [ ] V0.6 ESP32 Communication
 - [ ] V0.7 Object Tracking
 - [ ] V0.8 Image Stabilization
@@ -86,3 +87,13 @@ assets/aruco/aruco_dict_4x4_50_id_7.png
 ```
 
 Print the image clearly on flat paper, keep the black border visible, and avoid cutting off the marker edge.
+
+## Alarm Configuration
+
+V0.5 creates alarm events when a detection enters the configured boundary. The cooldown prevents repeated alerts from flooding the console and display:
+
+```python
+ALARM_COOLDOWN_SECONDS = 2.0
+```
+
+The current alarm output is a console message and an on-screen red alert banner. Later versions can extend the same `AlarmEvent` model to MQTT, Line Notify, email, or local log files.

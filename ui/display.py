@@ -102,11 +102,36 @@ class Display:
                 2
             )
 
+    def draw_alarm(self, frame, alarm_event):
+        if alarm_event is None:
+            return
+
+        height, width = frame.shape[:2]
+        banner_height = 46
+
+        cv2.rectangle(
+            frame,
+            (0, 0),
+            (width, banner_height),
+            (0, 0, 180),
+            -1
+        )
+
+        cv2.putText(
+            frame,
+            alarm_event.message,
+            (16, 31),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.7,
+            (255, 255, 255),
+            2
+        )
+
     def show(self, frame, fps):
         cv2.putText(
             frame,
             f"FPS : {fps:.2f}",
-            (20, 35),
+            (20, 80),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.8,
             (0, 255, 0),

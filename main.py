@@ -7,6 +7,7 @@ from utils.fps import FPS
 from detection.yolo import YOLODetector
 from boundary.manager import BoundaryManager
 from landmark.aruco import ArUcoLandmarkDetector
+from alarm.manager import AlarmManager
 
 
 def main():
@@ -20,6 +21,8 @@ def main():
     boundary = BoundaryManager(BOUNDARY_POINTS)
 
     landmark_detector = ArUcoLandmarkDetector(ARUCO_DICTIONARY)
+
+    alarm_manager = AlarmManager(ALARM_COOLDOWN_SECONDS)
 
     fps_counter = FPS()
 
@@ -40,9 +43,10 @@ def main():
 
         landmarks = landmark_detector.detect(frame)
 
-        for det in detections:
-            if det.inside_boundary:
-                print(f"Boundary event: {det.label} at {det.center}")
+        alarm_events = alarm_manager.update(detections)
+
+        for event in alarm_events:
+            print(event.message)
 
         fps = fps_counter.get()
 
@@ -51,6 +55,8 @@ def main():
         display.draw_landmarks(frame, landmarks)
 
         display.draw(frame, detections)
+
+        display.draw_alarm(frame, alarm_manager.latest_event)
 
         display.show(frame, fps)
 
