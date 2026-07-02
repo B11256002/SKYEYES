@@ -8,6 +8,8 @@ from detection.yolo import YOLODetector
 from boundary.manager import BoundaryManager
 from landmark.aruco import ArUcoLandmarkDetector
 from alarm.manager import AlarmManager
+from communication.factory import create_esp32_communicator
+from communication.protocol import make_command
 
 
 def main():
@@ -24,11 +26,19 @@ def main():
 
     alarm_manager = AlarmManager(ALARM_COOLDOWN_SECONDS)
 
+    esp32 = create_esp32_communicator(
+        ESP32_ENABLED,
+        ESP32_PORT,
+        ESP32_BAUDRATE
+    )
+    esp32_status = esp32.connect()
+
     fps_counter = FPS()
 
     print(f"Camera source: {CAMERA_SOURCE}")
     print(f"Model path: {MODEL_PATH}")
     print(f"Frame width: {FRAME_WIDTH}")
+    print(f"ESP32 status: {esp32_status.message}")
 
     while True:
 
@@ -47,6 +57,7 @@ def main():
 
         for event in alarm_events:
             print(event.message)
+            esp32.send(make_command("ALARM", event.message))
 
         fps = fps_counter.get()
 
@@ -64,6 +75,7 @@ def main():
             break
 
     camera.release()
+    esp32.close()
 
     display.close()
 

@@ -10,7 +10,7 @@ The system receives real-time images from an ESP32-S3-CAM or a video source, per
 
 ## Current Version
 
-V0.5 Alarm Module
+V0.6 ESP32 Communication
 
 ## Current Features
 
@@ -24,6 +24,7 @@ V0.5 Alarm Module
 - Configurable frame resizing for smaller display windows
 - ArUco marker landmark detection with marker ID and center point display
 - Boundary alarm events with cooldown and on-screen alert banner
+- ESP32 communication protocol with serial and mock modes
 
 ## Development Roadmap
 
@@ -32,7 +33,7 @@ V0.5 Alarm Module
 - [x] V0.3 Boundary Detection
 - [x] V0.4 ArUco Landmark
 - [x] V0.5 Alarm Module
-- [ ] V0.6 ESP32 Communication
+- [x] V0.6 ESP32 Communication
 - [ ] V0.7 Object Tracking
 - [ ] V0.8 Image Stabilization
 - [ ] V1.0 SKYEYES Release
@@ -97,3 +98,23 @@ ALARM_COOLDOWN_SECONDS = 2.0
 ```
 
 The current alarm output is a console message and an on-screen red alert banner. Later versions can extend the same `AlarmEvent` model to MQTT, Line Notify, email, or local log files.
+
+## ESP32 Communication Configuration
+
+V0.6 adds a PC-to-ESP32 command channel. The project defaults to mock mode, so the system can still be tested with video only when no ESP32 or webcam is available:
+
+```python
+ESP32_ENABLED = False
+ESP32_PORT = "COM3"
+ESP32_BAUDRATE = 115200
+```
+
+When `ESP32_ENABLED` is `False`, commands are recorded by `MockESP32Communicator` and no serial port is opened. When hardware is available, set `ESP32_ENABLED = True` and update `ESP32_PORT`.
+
+Commands are sent as one-line JSON messages:
+
+```json
+{"command":"ALARM","value":"person entered boundary"}
+```
+
+In V0.6, alarm events send an `ALARM` command to the ESP32 communication layer. Future firmware can interpret this command to trigger buzzer, LED, or telemetry behavior.
