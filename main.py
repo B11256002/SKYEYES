@@ -11,6 +11,7 @@ from alarm.manager import AlarmManager
 from communication.factory import create_esp32_communicator
 from communication.protocol import make_command
 from tracking.centroid import CentroidTracker
+from stabilization.image import ImageStabilizer
 
 
 def main():
@@ -29,6 +30,12 @@ def main():
 
     tracker = CentroidTracker(TRACKING_MAX_DISTANCE, TRACKING_MAX_MISSING)
 
+    stabilizer = ImageStabilizer(
+        STABILIZATION_ENABLED,
+        STABILIZATION_MAX_FEATURES,
+        STABILIZATION_MIN_MATCHES
+    )
+
     esp32 = create_esp32_communicator(
         ESP32_ENABLED,
         ESP32_PORT,
@@ -41,6 +48,7 @@ def main():
     print(f"Camera source: {CAMERA_SOURCE}")
     print(f"Model path: {MODEL_PATH}")
     print(f"Frame width: {FRAME_WIDTH}")
+    print(f"Stabilization enabled: {STABILIZATION_ENABLED}")
     print(f"ESP32 status: {esp32_status.message}")
 
     while True:
@@ -49,6 +57,8 @@ def main():
 
         if frame is None:
             break
+
+        frame = stabilizer.stabilize(frame)
 
         detections = detector.detect(frame)
 

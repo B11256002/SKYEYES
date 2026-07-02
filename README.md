@@ -10,7 +10,7 @@ The system receives real-time images from an ESP32-S3-CAM or a video source, per
 
 ## Current Version
 
-V0.7 Object Tracking
+V0.8 Image Stabilization
 
 ## Current Features
 
@@ -26,6 +26,7 @@ V0.7 Object Tracking
 - Boundary alarm events with cooldown and on-screen alert banner
 - ESP32 communication protocol with serial and mock modes
 - Centroid-based object tracking with stable detection IDs
+- Feature-based image stabilization before detection
 
 ## Development Roadmap
 
@@ -36,7 +37,7 @@ V0.7 Object Tracking
 - [x] V0.5 Alarm Module
 - [x] V0.6 ESP32 Communication
 - [x] V0.7 Object Tracking
-- [ ] V0.8 Image Stabilization
+- [x] V0.8 Image Stabilization
 - [ ] V1.0 SKYEYES Release
 
 ## Boundary Configuration
@@ -130,3 +131,15 @@ TRACKING_MAX_MISSING = 10
 ```
 
 Tracked detections display `ID n` on the frame. Alarm cooldown also uses `tracked_id`, so moving objects are handled more consistently than using center point alone. This is a simple tracker designed for the current video-only workflow; later versions can replace it with ByteTrack or DeepSORT if stronger tracking is needed.
+
+## Image Stabilization Configuration
+
+V0.8 adds feature-based image stabilization before YOLO detection. The first frame is used as the reference frame, and later frames are aligned with ORB feature matching and affine transform estimation:
+
+```python
+STABILIZATION_ENABLED = True
+STABILIZATION_MAX_FEATURES = 500
+STABILIZATION_MIN_MATCHES = 12
+```
+
+If there are not enough visual features or the transform cannot be estimated, the original frame is used. This keeps video-only testing stable even when a frame cannot be corrected.
