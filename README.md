@@ -10,7 +10,7 @@ The system receives real-time images from an ESP32-S3-CAM or a video source, per
 
 ## Current Version
 
-V0.8 Image Stabilization
+V0.9 System UI Overlay
 
 ## Current Features
 
@@ -27,6 +27,7 @@ V0.8 Image Stabilization
 - ESP32 communication protocol with serial and mock modes
 - Centroid-based object tracking with stable detection IDs
 - Feature-based image stabilization before detection
+- OpenCV system dashboard with FPS, detections, tracks, landmarks, ESP32 status, and latest alarm
 
 ## Development Roadmap
 
@@ -38,6 +39,7 @@ V0.8 Image Stabilization
 - [x] V0.6 ESP32 Communication
 - [x] V0.7 Object Tracking
 - [x] V0.8 Image Stabilization
+- [x] V0.9 System UI Overlay
 - [ ] V1.0 SKYEYES Release
 
 ## Boundary Configuration
@@ -64,6 +66,36 @@ FRAME_WIDTH = 960
 ```
 
 Frames wider than this value are resized while preserving the original aspect ratio. Smaller frames are kept unchanged.
+
+## YOLO Device Configuration
+
+YOLO inference device is configured in `config.py`:
+
+```python
+YOLO_DEVICE = "cuda"
+YOLO_IMAGE_SIZE = 640
+YOLO_HALF = True
+```
+
+Use `"cuda"` for NVIDIA GPU inference and `"cpu"` for CPU inference. Check whether the current Python environment can access CUDA:
+
+```powershell
+python tools\check_gpu.py
+```
+
+If CUDA is not available, install a CUDA-enabled PyTorch build in the same Python environment used to run `main.py`.
+
+For better real-time performance, the default display width is reduced and image stabilization is disabled:
+
+```python
+FRAME_WIDTH = 800
+VIDEO_REALTIME_PLAYBACK = True
+STABILIZATION_ENABLED = False
+```
+
+Increase these values only when image detail or stabilization is more important than FPS.
+
+When testing with a video file, `VIDEO_REALTIME_PLAYBACK` skips delayed frames so playback follows real time instead of becoming slow motion. This is closer to the final ESP32 live stream behavior, where the system should process the newest available frame.
 
 ## ArUco Landmark Configuration
 
@@ -143,3 +175,18 @@ STABILIZATION_MIN_MATCHES = 12
 ```
 
 If there are not enough visual features or the transform cannot be estimated, the original frame is used. This keeps video-only testing stable even when a frame cannot be corrected.
+
+## System UI Overlay
+
+V0.9 adds a right-side dashboard to the OpenCV display. The panel shows live system status without covering the video frame:
+
+- FPS
+- Detection count
+- Boundary intrusion count
+- ArUco landmark count
+- Active tracking IDs
+- ESP32 communication mode
+- Stabilization status
+- Latest alarm message
+
+This keeps the current video-only workflow simple while making the system easier to present and monitor.

@@ -12,13 +12,24 @@ from communication.factory import create_esp32_communicator
 from communication.protocol import make_command
 from tracking.centroid import CentroidTracker
 from stabilization.image import ImageStabilizer
+from core.system_status import SystemStatus
 
 
 def main():
 
-    camera = CameraReceiver(CAMERA_SOURCE, FRAME_WIDTH)
+    camera = CameraReceiver(
+        CAMERA_SOURCE,
+        FRAME_WIDTH,
+        VIDEO_REALTIME_PLAYBACK
+    )
 
-    detector = YOLODetector(MODEL_PATH, CONFIDENCE)
+    detector = YOLODetector(
+        MODEL_PATH,
+        CONFIDENCE,
+        YOLO_DEVICE,
+        YOLO_IMAGE_SIZE,
+        YOLO_HALF
+    )
 
     display = Display(WINDOW_NAME)
 
@@ -47,12 +58,15 @@ def main():
 
     print(f"Camera source: {CAMERA_SOURCE}")
     print(f"Model path: {MODEL_PATH}")
+    print(f"YOLO device: {YOLO_DEVICE}")
+    print(f"YOLO image size: {YOLO_IMAGE_SIZE}")
+    print(f"YOLO half precision: {YOLO_HALF}")
     print(f"Frame width: {FRAME_WIDTH}")
+    print(f"Realtime video playback: {VIDEO_REALTIME_PLAYBACK}")
     print(f"Stabilization enabled: {STABILIZATION_ENABLED}")
     print(f"ESP32 status: {esp32_status.message}")
 
     while True:
-
         frame = camera.read()
 
         if frame is None:
@@ -75,6 +89,21 @@ def main():
             esp32.send(make_command("ALARM", event.message))
 
         fps = fps_counter.get()
+        latest_alarm = "無警報"
+
+        if alarm_manager.latest_event is not None:
+            latest_alarm = alarm_manager.latest_event.message
+
+        status = SystemStatus(
+            fps=fps,
+            detections_count=len(detections),
+            inside_boundary_count=sum(det.inside_boundary for det in detections),
+            landmarks_count=len(landmarks),
+            active_tracks_count=len(tracker.tracks),
+            esp32_mode=esp32_status.mode,
+            stabilization_enabled=STABILIZATION_ENABLED,
+            latest_alarm=latest_alarm
+        )
 
         display.draw_boundary(frame, boundary.points)
 
@@ -84,7 +113,7 @@ def main():
 
         display.draw_alarm(frame, alarm_manager.latest_event)
 
-        display.show(frame, fps)
+        display.show(frame, fps, status)
 
         if cv2.waitKey(1) == ord("q"):
             break

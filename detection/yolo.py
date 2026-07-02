@@ -1,22 +1,38 @@
 import time
 
 from ultralytics import YOLO
+import torch
 
 from core.detection import Detection
 
 
 class YOLODetector:
 
-    def __init__(self, model_path, confidence=0.4):
+    def __init__(self, model_path, confidence=0.4, device="cpu", image_size=640, half=False):
 
         self.model = YOLO(model_path)
         self.confidence = confidence
+        self.device = self._resolve_device(device)
+        self.image_size = image_size
+        self.half = half and self.device == "cuda"
+
+    def _resolve_device(self, device):
+        if device == "cuda" and not torch.cuda.is_available():
+            raise RuntimeError(
+                "YOLO_DEVICE is set to 'cuda', but PyTorch cannot access CUDA. "
+                "Install a CUDA-enabled PyTorch build or set YOLO_DEVICE = 'cpu'."
+            )
+
+        return device
 
     def detect(self, frame):
 
         results = self.model.predict(
             source=frame,
             conf=self.confidence,
+            device=self.device,
+            imgsz=self.image_size,
+            half=self.half,
             verbose=False
         )
 
