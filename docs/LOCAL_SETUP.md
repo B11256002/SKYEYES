@@ -151,13 +151,13 @@ http://127.0.0.1:5000
 
 ## 8. Web 介面切換影像來源
 
-Web 介面右側有「影像來源」設定。
+Web 介面右側有控制分頁。預設顯示「影像來源」，也可以切換到「系統設定」查看目前執行參數。
 
-可選模式：
+「影像來源」可選模式：
 
-- `測試影片`: 使用 `config.py` 的 `CAMERA_SOURCE`。
-- `Webcam`: 來源值填 `0`、`1`、`2` 等攝影機編號。
-- `自訂來源`: 可填影片路徑或 OpenCV 可讀取的串流 URL。
+- `測試影片`：使用 `config.py` 的 `CAMERA_SOURCE`。
+- `Webcam`：來源值填 `0`、`1`、`2` 等攝影機編號。
+- `自訂來源`：可填影片路徑或 OpenCV 可讀取的串流 URL。
 
 範例：
 
@@ -169,7 +169,65 @@ http://192.168.4.1:81/stream
 
 未來接 ESP32-S3-CAM 時，先確認它在 Windows 上是 Webcam 裝置、HTTP/MJPEG 串流，還是 COM port。前兩種目前可直接用 Web 介面測試；COM port 傳 JPEG 需要再新增 Serial 影像接收器。
 
-## 9. 執行測試
+## 9. Web 介面 V1.0 功能
+
+### 系統設定分頁
+
+右側控制區可以切換到「系統設定」，目前會顯示：
+
+- YOLO 裝置、影像尺寸、FP16/FP32
+- 影像寬度
+- 辨識間隔
+- 後端目標 FPS
+- Web 串流 FPS
+- JPEG 品質
+
+這些值主要來自：
+
+```text
+config.py
+```
+
+### 警報紀錄
+
+右側底部的「警報紀錄」是內部卷軸，不會讓整個頁面一直往下延伸。
+
+### 匯出 CSV
+
+「警報紀錄」旁有 `CSV` 按鈕，可以下載：
+
+```text
+skyeyes_alarms.csv
+```
+
+CSV 使用 `UTF-8 with BOM`，Windows Excel 直接開啟時中文應該會正常顯示。
+
+如果仍出現亂碼，可在 Excel 使用：
+
+```text
+資料 -> 從文字/CSV -> 檔案原始格式選 UTF-8
+```
+
+## 10. 交接文件
+
+如果要了解系統各功能是怎麼做的、要改哪個檔案，請看：
+
+```text
+docs/HANDOFF.md
+```
+
+這份文件整理了：
+
+- OpenCV 版 UI 修改位置
+- Web 版 UI/API/runtime 修改位置
+- 影像來源切換
+- 效能控制
+- CSV 匯出
+- ArUco
+- ESP32
+- 常見修改需求對照表
+
+## 11. 執行測試
 
 ```powershell
 python -m unittest test_webapp.py test_display_dashboard.py test_aruco_landmark.py
@@ -181,7 +239,7 @@ python -m unittest test_webapp.py test_display_dashboard.py test_aruco_landmark.
 python -m unittest
 ```
 
-## 10. 常見問題
+## 12. 常見問題
 
 ### CUDA 顯示不可用
 
@@ -228,3 +286,11 @@ http://127.0.0.1:5000
 ```
 
 如果 port 被占用，先關閉原本正在跑的後端 PowerShell，或按 `Ctrl + C` 停止。
+
+### CSV 開起來是亂碼
+
+目前系統匯出的 CSV 已經使用 `UTF-8 with BOM`。如果某些 Excel 版本仍然亂碼，請用 Excel 的匯入功能：
+
+```text
+資料 -> 從文字/CSV -> 檔案原始格式選 UTF-8
+```
