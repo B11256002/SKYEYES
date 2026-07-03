@@ -1,4 +1,6 @@
 import time
+from csv import writer
+from io import StringIO
 from pathlib import Path
 
 from flask import Flask, Response, jsonify, request, send_from_directory
@@ -40,6 +42,32 @@ def create_app(runtime=None):
     @app.route("/api/alarms")
     def alarms():
         return jsonify(app.config["runtime"].get_alarms())
+
+    @app.route("/api/alarms.csv")
+    def alarms_csv():
+        output = StringIO()
+        csv_writer = writer(output)
+        csv_writer.writerow(["時間", "警報內容"])
+
+        for alarm in app.config["runtime"].get_alarms():
+            csv_writer.writerow([
+                alarm.get("time", ""),
+                alarm.get("message", ""),
+            ])
+
+        csv_bytes = output.getvalue().encode("utf-8-sig")
+
+        return Response(
+            csv_bytes,
+            mimetype="text/csv; charset=utf-8",
+            headers={
+                "Content-Disposition": "attachment; filename=skyeyes_alarms.csv"
+            },
+        )
+
+    @app.route("/api/settings")
+    def settings():
+        return jsonify(app.config["runtime"].get_settings())
 
     @app.route("/api/source", methods=["GET", "POST"])
     def source():

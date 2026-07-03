@@ -67,24 +67,59 @@
         </div>
       </section>
 
-      <section class="panel-block source-block">
-        <h2>&#24433;&#20687;&#20358;&#28304;</h2>
-        <div class="source-controls">
-          <label>
-            <span>&#27169;&#24335;</span>
-            <select id="source-mode">
-              <option value="video">&#28204;&#35430;&#24433;&#29255;</option>
-              <option value="webcam">Webcam</option>
-              <option value="custom">&#33258;&#35330;&#20358;&#28304;</option>
-            </select>
-          </label>
-          <label>
-            <span>&#20358;&#28304;&#20540;</span>
-            <input id="source-value" type="text" placeholder="0 / C:\path\video.mp4 / http://...">
-          </label>
-          <button id="source-apply" type="button">&#22871;&#29992;</button>
+      <section class="panel-block control-block">
+        <div class="control-tabs" role="tablist" aria-label="SKYEYES controls">
+          <button class="control-tab active" type="button" data-panel="source-panel">&#24433;&#20687;&#20358;&#28304;</button>
+          <button class="control-tab" type="button" data-panel="settings-panel">&#31995;&#32113;&#35373;&#23450;</button>
         </div>
-        <p id="source-status" class="source-status">&#30446;&#21069;&#65306;&#28204;&#35430;&#24433;&#29255;</p>
+
+        <div id="source-panel" class="control-panel active">
+          <div class="source-controls">
+            <label>
+              <span>&#27169;&#24335;</span>
+              <select id="source-mode">
+                <option value="video">&#28204;&#35430;&#24433;&#29255;</option>
+                <option value="webcam">Webcam</option>
+                <option value="custom">&#33258;&#35330;&#20358;&#28304;</option>
+              </select>
+            </label>
+            <label>
+              <span>&#20358;&#28304;&#20540;</span>
+              <input id="source-value" type="text" placeholder="0 / C:\path\video.mp4 / http://...">
+            </label>
+            <button id="source-apply" type="button">&#22871;&#29992;</button>
+          </div>
+          <p id="source-status" class="source-status">&#30446;&#21069;&#65306;&#28204;&#35430;&#24433;&#29255;</p>
+        </div>
+
+        <div id="settings-panel" class="control-panel">
+          <dl class="settings-list">
+            <div>
+              <dt>YOLO</dt>
+              <dd id="setting-yolo">cuda / 640</dd>
+            </div>
+            <div>
+              <dt>&#24433;&#20687;&#23532;&#24230;</dt>
+              <dd id="setting-frame-width">800</dd>
+            </div>
+            <div>
+              <dt>&#36776;&#35672;&#38291;&#38548;</dt>
+              <dd id="setting-interval">10</dd>
+            </div>
+            <div>
+              <dt>&#24460;&#31471; FPS</dt>
+              <dd id="setting-runtime-fps">10</dd>
+            </div>
+            <div>
+              <dt>Web FPS</dt>
+              <dd id="setting-web-fps">10</dd>
+            </div>
+            <div>
+              <dt>JPEG</dt>
+              <dd id="setting-jpeg">70</dd>
+            </div>
+          </dl>
+        </div>
       </section>
 
       <section class="panel-block alarm-block">
@@ -93,7 +128,10 @@
       </section>
 
       <section class="panel-block history-block">
-        <h2>&#35686;&#22577;&#32000;&#37636;</h2>
+        <div class="panel-heading">
+          <h2>&#35686;&#22577;&#32000;&#37636;</h2>
+          <a class="export-link" href="/api/alarms.csv" download="skyeyes_alarms.csv">CSV</a>
+        </div>
         <ol id="alarm-list" class="alarm-list"></ol>
       </section>
     </aside>

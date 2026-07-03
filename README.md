@@ -16,6 +16,8 @@ V0.9 System UI Overlay
 
 For local installation and startup instructions, see [docs/LOCAL_SETUP.md](docs/LOCAL_SETUP.md).
 
+For implementation notes and modification guidance, see [docs/HANDOFF.md](docs/HANDOFF.md).
+
 ## Current Features
 
 - Modular project architecture

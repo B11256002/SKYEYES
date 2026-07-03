@@ -31,6 +31,14 @@ const ids = {
   sourceValue: document.getElementById("source-value"),
   sourceApply: document.getElementById("source-apply"),
   sourceStatus: document.getElementById("source-status"),
+  settingYolo: document.getElementById("setting-yolo"),
+  settingFrameWidth: document.getElementById("setting-frame-width"),
+  settingInterval: document.getElementById("setting-interval"),
+  settingRuntimeFps: document.getElementById("setting-runtime-fps"),
+  settingWebFps: document.getElementById("setting-web-fps"),
+  settingJpeg: document.getElementById("setting-jpeg"),
+  controlTabs: document.querySelectorAll(".control-tab"),
+  controlPanels: document.querySelectorAll(".control-panel"),
 };
 
 let lastSourceSignature = "";
@@ -192,12 +200,38 @@ async function updateAlarms() {
   }
 }
 
+async function updateSettings() {
+  const settings = await fetchJson("/api/settings");
+  const precision = settings.yolo_half ? "FP16" : "FP32";
+
+  ids.settingYolo.textContent = `${settings.yolo_device} / ${settings.yolo_image_size} / ${precision}`;
+  ids.settingFrameWidth.textContent = settings.frame_width;
+  ids.settingInterval.textContent = settings.vision_process_interval;
+  ids.settingRuntimeFps.textContent = settings.runtime_target_fps;
+  ids.settingWebFps.textContent = settings.web_stream_fps;
+  ids.settingJpeg.textContent = settings.web_jpeg_quality;
+}
+
+function activateControlPanel(panelId) {
+  for (const tab of ids.controlTabs) {
+    tab.classList.toggle("active", tab.dataset.panel === panelId);
+  }
+
+  for (const panel of ids.controlPanels) {
+    panel.classList.toggle("active", panel.id === panelId);
+  }
+}
+
 async function refresh() {
   await Promise.all([updateStatus(), updateAlarms()]);
 }
 
+updateSettings();
 refresh();
 refreshSourceInputState();
 ids.sourceMode.addEventListener("change", refreshSourceInputState);
 ids.sourceApply.addEventListener("click", applySource);
+for (const tab of ids.controlTabs) {
+  tab.addEventListener("click", () => activateControlPanel(tab.dataset.panel));
+}
 setInterval(refresh, 700);

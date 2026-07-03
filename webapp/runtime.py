@@ -74,6 +74,20 @@ class SkyEyesRuntime:
         with self.lock:
             return list(self.alarms)
 
+    def get_settings(self):
+        return {
+            "yolo_device": YOLO_DEVICE,
+            "yolo_image_size": YOLO_IMAGE_SIZE,
+            "yolo_half": YOLO_HALF,
+            "frame_width": FRAME_WIDTH,
+            "vision_process_interval": VISION_PROCESS_INTERVAL,
+            "runtime_target_fps": RUNTIME_TARGET_FPS,
+            "web_stream_fps": WEB_STREAM_FPS,
+            "web_jpeg_quality": WEB_JPEG_QUALITY,
+            "video_realtime_playback": VIDEO_REALTIME_PLAYBACK,
+            "esp32_enabled": ESP32_ENABLED,
+        }
+
     def get_source(self):
         with self.lock:
             return dict(self.source_config)

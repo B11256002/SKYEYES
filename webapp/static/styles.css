@@ -28,7 +28,7 @@ body {
 
 .shell {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: minmax(0, 1fr) clamp(340px, 24vw, 420px);
   height: 100vh;
   min-height: 100vh;
   overflow: hidden;
@@ -110,10 +110,10 @@ h1 {
   min-width: 0;
   min-height: 0;
   height: 100vh;
-  padding: 18px;
+  padding: 10px;
   display: grid;
-  grid-template-rows: auto auto auto auto minmax(0, 1fr);
-  gap: 14px;
+  grid-template-rows: auto auto auto auto minmax(104px, 1fr);
+  gap: 8px;
   overflow: hidden;
   background: var(--panel);
 }
@@ -122,11 +122,11 @@ h1 {
   min-width: 0;
   background: var(--panel-2);
   border: 1px solid var(--line);
-  padding: 14px;
+  padding: 12px;
 }
 
 .panel-block h2 {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   color: #f8fafc;
   font-size: 16px;
   font-weight: 700;
@@ -134,13 +134,13 @@ h1 {
 
 .metric-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .metric {
-  min-height: 62px;
-  padding: 10px;
+  min-height: 48px;
+  padding: 7px 9px;
   background: #171b1f;
   border: 1px solid #2c333b;
 }
@@ -154,9 +154,9 @@ h1 {
 
 .metric strong {
   display: block;
-  margin-top: 6px;
+  margin-top: 3px;
   overflow-wrap: anywhere;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
 }
 
@@ -171,13 +171,40 @@ h1 {
   overflow: hidden;
 }
 
-.history-block h2 {
+.history-block h2,
+.panel-heading {
   flex: 0 0 auto;
 }
 
+.panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.panel-heading h2 {
+  margin-bottom: 0;
+}
+
+.export-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  min-width: 48px;
+  border: 1px solid rgba(215, 154, 43, 0.55);
+  background: rgba(215, 154, 43, 0.14);
+  color: #ffe3a9;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
 .latest-alarm {
-  min-height: 76px;
-  padding: 12px;
+  min-height: 52px;
+  padding: 10px;
   overflow-wrap: anywhere;
   background: rgba(220, 77, 77, 0.18);
   border-left: 4px solid var(--red);
@@ -193,7 +220,7 @@ h1 {
 
 .alarm-list {
   flex: 1 1 auto;
-  min-height: 120px;
+  min-height: 80px;
   margin: 0;
   padding: 0;
   overflow-y: auto;
@@ -231,29 +258,60 @@ h1 {
 .health-strip {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
 }
 
 .health-strip div {
-  padding: 12px;
+  padding: 9px;
   background: #111519;
   border: 1px solid var(--line);
 }
 
 .health-strip strong {
   display: block;
-  margin-top: 6px;
+  margin-top: 3px;
   color: var(--cyan);
-  font-size: 17px;
+  font-size: 15px;
 }
 
-.source-block {
+.control-block {
   padding-bottom: 12px;
+}
+
+.control-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.control-tab {
+  height: 32px;
+  border: 1px solid #35404a;
+  background: #171b1f;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.control-tab.active {
+  border-color: rgba(61, 181, 216, 0.62);
+  background: rgba(61, 181, 216, 0.16);
+  color: #d9f7ff;
+  font-weight: 700;
+}
+
+.control-panel {
+  display: none;
+}
+
+.control-panel.active {
+  display: block;
 }
 
 .source-controls {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) auto;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr) auto;
   gap: 10px;
   align-items: end;
 }
@@ -301,8 +359,35 @@ h1 {
 }
 
 .source-status {
-  margin-top: 10px;
+  margin-top: 8px;
   overflow-wrap: anywhere;
+}
+
+.settings-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.settings-list div {
+  min-width: 0;
+  padding: 6px;
+  background: #171b1f;
+  border: 1px solid #2c333b;
+}
+
+.settings-list dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.settings-list dd {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
 }
 
 @media (max-width: 980px) {
@@ -327,11 +412,29 @@ h1 {
     grid-template-rows: auto;
   }
 
+  .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .source-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-list {
     grid-template-columns: 1fr;
   }
 
   .alarm-list {
     max-height: 320px;
+  }
+}
+
+@media (max-width: 1320px) and (min-width: 981px) {
+  .shell {
+    grid-template-columns: minmax(0, 1fr) 340px;
+  }
+
+  .source-controls button {
+    padding: 0 10px;
   }
 }

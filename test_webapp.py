@@ -35,6 +35,20 @@ class FakeRuntime:
     def get_frame(self):
         return None
 
+    def get_settings(self):
+        return {
+            "yolo_device": "cuda",
+            "yolo_image_size": 640,
+            "yolo_half": False,
+            "frame_width": 800,
+            "vision_process_interval": 10,
+            "runtime_target_fps": 10,
+            "web_stream_fps": 10,
+            "web_jpeg_quality": 70,
+            "video_realtime_playback": True,
+            "esp32_enabled": False,
+        }
+
     def get_source(self):
         return {
             "mode": "video",
@@ -73,6 +87,27 @@ class WebAppTest(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get_json()[0]["time"], "12:00:00")
+
+    def test_alarms_csv_endpoint(self):
+        app = create_app(FakeRuntime())
+        client = app.test_client()
+
+        response = client.get("/api/alarms.csv")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "text/csv")
+        self.assertIn("skyeyes_alarms.csv", response.headers["Content-Disposition"])
+        self.assertTrue(response.data.startswith(b"\xef\xbb\xbf"))
+        self.assertIn("時間,警報內容", response.data.decode("utf-8-sig"))
+
+    def test_settings_endpoint(self):
+        app = create_app(FakeRuntime())
+        client = app.test_client()
+
+        response = client.get("/api/settings")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json()["runtime_target_fps"], 10)
 
     def test_source_endpoint(self):
         app = create_app(FakeRuntime())
