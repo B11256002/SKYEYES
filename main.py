@@ -89,7 +89,7 @@ def main():
             esp32.send(make_command("ALARM", event.message))
 
         fps = fps_counter.get()
-        latest_alarm = "無警報"
+        latest_alarm = "\u7121\u8b66\u5831"
 
         if alarm_manager.latest_event is not None:
             latest_alarm = alarm_manager.latest_event.message

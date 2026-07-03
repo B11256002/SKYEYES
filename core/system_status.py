@@ -11,4 +11,4 @@ class SystemStatus:
     active_tracks_count: int
     esp32_mode: str
     stabilization_enabled: bool
-    latest_alarm: str = "無警報"
+    latest_alarm: str = "\u7121\u8b66\u5831"

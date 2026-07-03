@@ -45,8 +45,10 @@ class AlarmManager:
             track_label = f" ID {detection.tracked_id}"
 
         message = (
-            f"警報：{detection.label}{track_label} 進入邊界 "
-            f"位置 {detection.center} 信心 {detection.confidence:.2f}"
+            f"\u8b66\u5831\uff1a{detection.label}{track_label} "
+            f"\u9032\u5165\u908a\u754c "
+            f"\u4f4d\u7f6e {detection.center} "
+            f"\u4fe1\u5fc3 {detection.confidence:.2f}"
         )
 
         return AlarmEvent(

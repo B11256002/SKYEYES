@@ -3,6 +3,24 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 
+TEXT = {
+    "boundary": "\u908a\u754c",
+    "inside": "\u754c\u5167",
+    "outside": "\u754c\u5916",
+    "landmark": "\u5730\u6a19",
+    "monitor": "\u7cfb\u7d71\u76e3\u63a7",
+    "detections": "\u5075\u6e2c\u6578",
+    "inside_count": "\u754c\u5167\u6578",
+    "landmarks": "\u5730\u6a19\u6578",
+    "tracks": "\u8ffd\u8e64\u6578",
+    "stabilizer": "\u7a69\u5b9a\u5668",
+    "on": "\u958b\u555f",
+    "off": "\u95dc\u9589",
+    "latest_alarm": "\u6700\u65b0\u8b66\u5831",
+    "no_alarm": "\u7121\u8b66\u5831",
+}
+
+
 class Display:
 
     def __init__(self, window_name):
@@ -28,7 +46,7 @@ class Display:
 
         self._put_text(
             frame,
-            "邊界",
+            TEXT["boundary"],
             int(pts[0][0][0]),
             int(pts[0][0][1]),
             22,
@@ -39,7 +57,7 @@ class Display:
         for det in detections:
             pts = np.array(det.corners, dtype=np.int32).reshape((-1, 1, 2))
             color = (0, 0, 255) if det.inside_boundary else (0, 255, 0)
-            status = "界內" if det.inside_boundary else "界外"
+            status = TEXT["inside"] if det.inside_boundary else TEXT["outside"]
 
             cv2.polylines(
                 frame,
@@ -95,7 +113,7 @@ class Display:
 
             self._put_text(
                 frame,
-                f"地標 ID {landmark.marker_id}",
+                f"{TEXT['landmark']} ID {landmark.marker_id}",
                 int(landmark.center[0]) + 8,
                 int(landmark.center[1]) - 8,
                 20,
@@ -130,36 +148,39 @@ class Display:
         cv2.rectangle(
             panel,
             (0, 0),
-            (self.panel_width, 54),
+            (self.panel_width, 52),
             (20, 96, 130),
             -1
         )
 
-        self._put_panel_text(panel, "SKYEYES", 18, 36, 26, (255, 255, 255))
-        self._put_panel_text(panel, "系統監控", 18, 76, 18, (190, 210, 220))
+        self._put_panel_text(panel, "SKYEYES", 18, 34, 26, (255, 255, 255))
+        self._put_panel_text(panel, TEXT["monitor"], 18, 72, 18, (190, 210, 220))
 
         rows = [
             ("FPS", f"{status.fps:.2f}"),
-            ("偵測數", str(status.detections_count)),
-            ("界內數", str(status.inside_boundary_count)),
-            ("地標數", str(status.landmarks_count)),
-            ("追蹤數", str(status.active_tracks_count)),
+            (TEXT["detections"], str(status.detections_count)),
+            (TEXT["inside_count"], str(status.inside_boundary_count)),
+            (TEXT["landmarks"], str(status.landmarks_count)),
+            (TEXT["tracks"], str(status.active_tracks_count)),
             ("ESP32", status.esp32_mode),
-            ("穩定器", "開啟" if status.stabilization_enabled else "關閉"),
+            (
+                TEXT["stabilizer"],
+                TEXT["on"] if status.stabilization_enabled else TEXT["off"],
+            ),
         ]
 
-        y = 112
+        y = 106
 
         for label, value in rows:
             self._draw_status_row(panel, label, value, y)
-            y += 36
+            y += 34
 
-        self._draw_latest_alarm(panel, status.latest_alarm, y + 10, height)
+        self._draw_latest_alarm(panel, status.latest_alarm, y + 8, height)
 
         return np.hstack((frame, panel))
 
     def show(self, frame, fps, status=None):
-        self._put_text(frame, f"FPS：{fps:.2f}", 20, 56, 24, (0, 255, 0))
+        self._put_text(frame, f"FPS: {fps:.2f}", 20, 56, 24, (0, 255, 0))
 
         if status is not None:
             frame = self.draw_dashboard(frame, status)
@@ -172,24 +193,25 @@ class Display:
     def _draw_status_row(self, panel, label, value, y):
         cv2.rectangle(
             panel,
-            (16, y - 22),
-            (self.panel_width - 16, y + 8),
+            (16, y - 21),
+            (self.panel_width - 16, y + 7),
             (42, 47, 54),
             -1
         )
 
-        self._put_panel_text(panel, label, 28, y, 17, (185, 190, 195))
-        self._put_panel_text(panel, value, 178, y, 18, (245, 245, 245))
+        self._put_panel_text(panel, label, 28, y, 16, (185, 190, 195))
+        self._put_panel_text(panel, value, 178, y, 17, (245, 245, 245))
 
     def _draw_latest_alarm(self, panel, latest_alarm, y, panel_height):
+        min_height = 96
         bottom = panel_height - 16
 
-        if bottom <= y + 48:
-            return
+        if bottom - y < min_height:
+            y = max(88, bottom - min_height)
 
         alarm_color = (80, 80, 220)
 
-        if latest_alarm == "無警報":
+        if latest_alarm == TEXT["no_alarm"]:
             alarm_color = (70, 130, 70)
 
         cv2.rectangle(
@@ -199,7 +221,7 @@ class Display:
             alarm_color,
             -1
         )
-        self._put_panel_text(panel, "最新警報", 28, y + 28, 17, (255, 255, 255))
+        self._put_panel_text(panel, TEXT["latest_alarm"], 28, y + 28, 17, (255, 255, 255))
         self._put_wrapped_text(
             panel,
             latest_alarm,
@@ -215,12 +237,11 @@ class Display:
         self._put_text(image, text, x, y - font_size, font_size, color)
 
     def _put_wrapped_text(self, image, text, x, y, max_width, font_size, color, max_y):
-        words = str(text).split()
         line = ""
         line_height = font_size + 8
 
-        for word in words:
-            candidate = word if not line else f"{line} {word}"
+        for char in str(text):
+            candidate = f"{line}{char}"
             size = self._text_size(candidate, font_size)
 
             if size[0] <= max_width:
@@ -232,7 +253,7 @@ class Display:
 
             self._put_text(image, line, x, y, font_size, color)
             y += line_height
-            line = word
+            line = char
 
         if line and y + line_height <= max_y:
             self._put_text(image, line, x, y, font_size, color)
