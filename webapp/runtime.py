@@ -23,26 +23,31 @@ class SkyEyesRuntime:
 
     def __init__(self):
         self.lock = threading.Lock()
+        self.lifecycle_lock = threading.RLock()
         self.thread = None
         self.stop_event = threading.Event()
         self.latest_jpeg = None
         self.status = self._empty_status()
         self.alarms = deque(maxlen=30)
         self.error = None
+        self.source_config = self._build_source_config("video", CAMERA_SOURCE)
 
     def start(self):
-        if self.thread and self.thread.is_alive():
-            return
+        with self.lifecycle_lock:
+            if self.thread and self.thread.is_alive():
+                return
 
-        self.stop_event.clear()
-        self.thread = threading.Thread(target=self._run, daemon=True)
-        self.thread.start()
+            self.stop_event.clear()
+            self.thread = threading.Thread(target=self._run, daemon=True)
+            self.thread.start()
 
     def stop(self):
-        self.stop_event.set()
+        with self.lifecycle_lock:
+            self.stop_event.set()
 
-        if self.thread:
-            self.thread.join(timeout=2)
+            if self.thread:
+                self.thread.join(timeout=2)
+                self.thread = None
 
     def get_frame(self):
         with self.lock:
@@ -62,19 +67,49 @@ class SkyEyesRuntime:
                 "stabilization_enabled": status.stabilization_enabled,
                 "latest_alarm": status.latest_alarm,
                 "error": self.error,
+                "source": dict(self.source_config),
             }
 
     def get_alarms(self):
         with self.lock:
             return list(self.alarms)
 
+    def get_source(self):
+        with self.lock:
+            return dict(self.source_config)
+
+    def set_source(self, mode, value=None):
+        next_config = self._build_source_config(mode, value)
+
+        with self.lock:
+            current_config = dict(self.source_config)
+
+        if (
+            current_config["mode"] == next_config["mode"]
+            and current_config["value"] == next_config["value"]
+        ):
+            return next_config
+
+        self.stop()
+
+        with self.lock:
+            self.source_config = next_config
+            self.latest_jpeg = None
+            self.status = self._empty_status()
+            self.error = "\u5f71\u50cf\u4f86\u6e90\u5207\u63db\u4e2d"
+
+        self.start()
+
+        return next_config
+
     def _run(self):
         camera = None
         esp32 = None
 
         try:
+            source_config = self.get_source()
             camera = CameraReceiver(
-                CAMERA_SOURCE,
+                source_config["source"],
                 FRAME_WIDTH,
                 VIDEO_REALTIME_PLAYBACK
             )
@@ -170,6 +205,50 @@ class SkyEyesRuntime:
             "time": time.strftime("%H:%M:%S"),
             "message": message,
         })
+
+    def _build_source_config(self, mode, value=None):
+        normalized_mode = (mode or "video").strip().lower()
+
+        if normalized_mode == "video":
+            source = CAMERA_SOURCE
+            display_value = str(CAMERA_SOURCE)
+            label = "\u6e2c\u8a66\u5f71\u7247"
+        elif normalized_mode == "webcam":
+            source = self._parse_camera_index(value, 0)
+            display_value = str(source)
+            label = f"Webcam {source}"
+        elif normalized_mode == "custom":
+            display_value = str(value or "").strip()
+
+            if not display_value:
+                raise ValueError("\u8acb\u8f38\u5165\u81ea\u8a02\u5f71\u50cf\u4f86\u6e90")
+
+            source = self._parse_custom_source(display_value)
+            label = "\u81ea\u8a02\u4f86\u6e90"
+        else:
+            raise ValueError("\u4e0d\u652f\u63f4\u7684\u5f71\u50cf\u4f86\u6e90")
+
+        return {
+            "mode": normalized_mode,
+            "value": display_value,
+            "source": source,
+            "label": label,
+        }
+
+    def _parse_camera_index(self, value, default):
+        if value in (None, ""):
+            return default
+
+        try:
+            return int(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("Webcam \u7de8\u865f\u5fc5\u9808\u662f\u6578\u5b57") from exc
+
+    def _parse_custom_source(self, value):
+        try:
+            return int(value)
+        except ValueError:
+            return value
 
     def _empty_status(self):
         return SystemStatus(

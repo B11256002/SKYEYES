@@ -112,7 +112,7 @@ h1 {
   height: 100vh;
   padding: 18px;
   display: grid;
-  grid-template-rows: auto auto auto minmax(0, 1fr);
+  grid-template-rows: auto auto auto auto minmax(0, 1fr);
   gap: 14px;
   overflow: hidden;
   background: var(--panel);
@@ -247,6 +247,64 @@ h1 {
   font-size: 17px;
 }
 
+.source-block {
+  padding-bottom: 12px;
+}
+
+.source-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.source-controls label {
+  min-width: 0;
+}
+
+.source-controls span,
+.source-status {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.source-controls select,
+.source-controls input {
+  width: 100%;
+  height: 36px;
+  margin-top: 6px;
+  padding: 0 10px;
+  border: 1px solid #35404a;
+  background: #111519;
+  color: var(--text);
+  font: inherit;
+}
+
+.source-controls input::placeholder {
+  color: #6f7a85;
+}
+
+.source-controls button {
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid rgba(61, 181, 216, 0.55);
+  background: rgba(61, 181, 216, 0.16);
+  color: #d9f7ff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.source-controls button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.source-status {
+  margin-top: 10px;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 980px) {
   body {
     height: auto;
@@ -267,6 +325,10 @@ h1 {
     height: auto;
     overflow: visible;
     grid-template-rows: auto;
+  }
+
+  .source-controls {
+    grid-template-columns: 1fr;
   }
 
   .alarm-list {

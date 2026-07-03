@@ -1,7 +1,7 @@
 import time
 from pathlib import Path
 
-from flask import Flask, Response, jsonify, send_from_directory
+from flask import Flask, Response, jsonify, request, send_from_directory
 
 from webapp.runtime import SkyEyesRuntime
 
@@ -39,6 +39,25 @@ def create_app(runtime=None):
     @app.route("/api/alarms")
     def alarms():
         return jsonify(app.config["runtime"].get_alarms())
+
+    @app.route("/api/source", methods=["GET", "POST"])
+    def source():
+        runtime = app.config["runtime"]
+
+        if request.method == "GET":
+            return jsonify(runtime.get_source())
+
+        data = request.get_json(silent=True) or {}
+
+        try:
+            source_config = runtime.set_source(
+                data.get("mode"),
+                data.get("value")
+            )
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
+
+        return jsonify(source_config)
 
     @app.route("/api/snapshot")
     def snapshot():
