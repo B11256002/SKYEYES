@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SKYEYES Web Console</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <main class="shell">
+    <section class="video-region">
+      <header class="topbar">
+        <div>
+          <h1>SKYEYES</h1>
+          <p>&#36786;&#26989;&#31354;&#22495;&#30435;&#25511;&#31995;&#32113;</p>
+        </div>
+        <div class="live-pill">
+          <span></span>
+          LIVE
+        </div>
+      </header>
+
+      <div class="video-frame">
+        <img id="video" src="/video_feed" alt="SKYEYES &#21363;&#26178;&#24433;&#20687;">
+      </div>
+    </section>
+
+    <aside class="side-panel">
+      <section class="panel-block status-block">
+        <h2>&#31995;&#32113;&#29376;&#24907;</h2>
+        <div class="metric-grid">
+          <div class="metric">
+            <span>FPS</span>
+            <strong id="fps">0.00</strong>
+          </div>
+          <div class="metric">
+            <span>&#20597;&#28204;&#25976;</span>
+            <strong id="detections">0</strong>
+          </div>
+          <div class="metric">
+            <span>&#30028;&#20839;&#25976;</span>
+            <strong id="inside">0</strong>
+          </div>
+          <div class="metric">
+            <span>&#36861;&#36452;&#25976;</span>
+            <strong id="tracks">0</strong>
+          </div>
+          <div class="metric">
+            <span>&#22320;&#27161;&#25976;</span>
+            <strong id="landmarks">0</strong>
+          </div>
+          <div class="metric">
+            <span>ESP32</span>
+            <strong id="esp32">offline</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="health-strip">
+        <div>
+          <span>&#31337;&#23450;&#22120;</span>
+          <strong id="stabilizer">&#38364;&#38281;</strong>
+        </div>
+        <div>
+          <span>&#24460;&#31471;</span>
+          <strong id="backend">&#36899;&#32218;&#20013;</strong>
+        </div>
+      </section>
+
+      <section class="panel-block alarm-block">
+        <h2>&#26368;&#26032;&#35686;&#22577;</h2>
+        <div id="latest-alarm" class="latest-alarm">&#28961;&#35686;&#22577;</div>
+      </section>
+
+      <section class="panel-block history-block">
+        <h2>&#35686;&#22577;&#32000;&#37636;</h2>
+        <ol id="alarm-list" class="alarm-list"></ol>
+      </section>
+    </aside>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

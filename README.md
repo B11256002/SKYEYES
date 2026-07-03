@@ -74,7 +74,7 @@ YOLO inference device is configured in `config.py`:
 ```python
 YOLO_DEVICE = "cuda"
 YOLO_IMAGE_SIZE = 640
-YOLO_HALF = True
+YOLO_HALF = False
 ```
 
 Use `"cuda"` for NVIDIA GPU inference and `"cpu"` for CPU inference. Check whether the current Python environment can access CUDA:
@@ -190,3 +190,26 @@ V0.9 adds a right-side dashboard to the OpenCV display. The panel shows live sys
 - Latest alarm message
 
 This keeps the current video-only workflow simple while making the system easier to present and monitor.
+
+## Web Interface
+
+The experimental web console runs on a separate branch and keeps the OpenCV version intact. Start it from the project root:
+
+```powershell
+D:\Tool\Anaconda\envs\skyeyes\python.exe -m webapp.server
+```
+
+Then open:
+
+```text
+http://127.0.0.1:5000
+```
+
+The web console provides:
+
+- MJPEG live video stream
+- Real-time FPS, detection, tracking, landmark, and ESP32 status
+- Latest alarm panel
+- Alarm history list
+
+The backend still uses the same Python YOLO pipeline, so GPU, frame size, and realtime playback settings remain controlled by `config.py`.

@@ -1,0 +1,275 @@
+:root {
+  color-scheme: dark;
+  --bg: #101316;
+  --panel: #191d21;
+  --panel-2: #22272d;
+  --line: #313840;
+  --text: #edf2f7;
+  --muted: #9aa6b2;
+  --cyan: #3db5d8;
+  --amber: #d79a2b;
+  --red: #dc4d4d;
+  --green: #47b36b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  min-height: 100vh;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Microsoft JhengHei", "Noto Sans TC", system-ui, sans-serif;
+}
+
+.shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  height: 100vh;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.video-region {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: 72px minmax(0, 1fr);
+  border-right: 1px solid var(--line);
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 22px;
+  background: #14181c;
+  border-bottom: 1px solid var(--line);
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: 24px;
+  letter-spacing: 0;
+}
+
+.topbar p {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid rgba(71, 179, 107, 0.45);
+  color: #c7f7d7;
+  background: rgba(71, 179, 107, 0.14);
+  font-size: 13px;
+}
+
+.live-pill span {
+  width: 8px;
+  height: 8px;
+  background: var(--green);
+  border-radius: 50%;
+}
+
+.video-frame {
+  min-height: 0;
+  display: grid;
+  align-items: start;
+  justify-items: center;
+  padding: 18px;
+  background: #0b0d0f;
+}
+
+.video-frame img {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - 108px);
+  width: auto;
+  height: auto;
+  border: 1px solid #2b3138;
+  background: #000;
+}
+
+.side-panel {
+  min-width: 0;
+  min-height: 0;
+  height: 100vh;
+  padding: 18px;
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+  gap: 14px;
+  overflow: hidden;
+  background: var(--panel);
+}
+
+.panel-block {
+  min-width: 0;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  padding: 14px;
+}
+
+.panel-block h2 {
+  margin-bottom: 12px;
+  color: #f8fafc;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.metric {
+  min-height: 62px;
+  padding: 10px;
+  background: #171b1f;
+  border: 1px solid #2c333b;
+}
+
+.metric span,
+.health-strip span {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.metric strong {
+  display: block;
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.alarm-block {
+  border-color: rgba(220, 77, 77, 0.55);
+}
+
+.history-block {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.history-block h2 {
+  flex: 0 0 auto;
+}
+
+.latest-alarm {
+  min-height: 76px;
+  padding: 12px;
+  overflow-wrap: anywhere;
+  background: rgba(220, 77, 77, 0.18);
+  border-left: 4px solid var(--red);
+  color: #fff2f2;
+  line-height: 1.5;
+}
+
+.latest-alarm.idle {
+  background: rgba(71, 179, 107, 0.14);
+  border-left-color: var(--green);
+  color: #ddffe7;
+}
+
+.alarm-list {
+  flex: 1 1 auto;
+  min-height: 120px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+}
+
+.alarm-list::-webkit-scrollbar {
+  width: 10px;
+}
+
+.alarm-list::-webkit-scrollbar-track {
+  background: #171b1f;
+}
+
+.alarm-list::-webkit-scrollbar-thumb {
+  background: #46515c;
+  border: 2px solid #171b1f;
+}
+
+.alarm-list li {
+  padding: 10px 0;
+  border-bottom: 1px solid #323941;
+  overflow-wrap: anywhere;
+  line-height: 1.45;
+}
+
+.alarm-list time {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--amber);
+  font-size: 12px;
+}
+
+.health-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.health-strip div {
+  padding: 12px;
+  background: #111519;
+  border: 1px solid var(--line);
+}
+
+.health-strip strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--cyan);
+  font-size: 17px;
+}
+
+@media (max-width: 980px) {
+  body {
+    height: auto;
+    overflow: auto;
+  }
+
+  .shell {
+    grid-template-columns: 1fr;
+    height: auto;
+    overflow: visible;
+  }
+
+  .video-region {
+    border-right: 0;
+  }
+
+  .side-panel {
+    height: auto;
+    overflow: visible;
+    grid-template-rows: auto;
+  }
+
+  .alarm-list {
+    max-height: 320px;
+  }
+}
