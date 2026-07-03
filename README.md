@@ -12,6 +12,10 @@ The system receives real-time images from an ESP32-S3-CAM or a video source, per
 
 V0.9 System UI Overlay
 
+## Local Setup
+
+For local installation and startup instructions, see [docs/LOCAL_SETUP.md](docs/LOCAL_SETUP.md).
+
 ## Current Features
 
 - Modular project architecture
@@ -75,6 +79,10 @@ YOLO inference device is configured in `config.py`:
 YOLO_DEVICE = "cuda"
 YOLO_IMAGE_SIZE = 640
 YOLO_HALF = False
+VISION_PROCESS_INTERVAL = 10
+RUNTIME_TARGET_FPS = 10
+WEB_STREAM_FPS = 10
+WEB_JPEG_QUALITY = 70
 ```
 
 Use `"cuda"` for NVIDIA GPU inference and `"cpu"` for CPU inference. Check whether the current Python environment can access CUDA:
@@ -96,6 +104,10 @@ STABILIZATION_ENABLED = False
 Increase these values only when image detail or stabilization is more important than FPS.
 
 When testing with a video file, `VIDEO_REALTIME_PLAYBACK` skips delayed frames so playback follows real time instead of becoming slow motion. This is closer to the final ESP32 live stream behavior, where the system should process the newest available frame.
+
+`VISION_PROCESS_INTERVAL` controls how often the heavy vision pipeline runs. The default value `10` means YOLO, tracking, boundary checks, ArUco detection, and alarm updates run once every 10 frames while the video still plays every frame. Lower it for faster alert response, or raise it to reduce CPU usage further.
+
+`RUNTIME_TARGET_FPS` caps the backend frame loop itself. This prevents the system from using extra CPU just to decode, resize, draw, or encode frames faster than the monitor view needs. For the web console, `WEB_STREAM_FPS` caps how often JPEG frames are encoded and sent to the browser. `WEB_JPEG_QUALITY` controls MJPEG compression quality. Lower values reduce CPU usage and bandwidth at the cost of visual detail.
 
 ## ArUco Landmark Configuration
 

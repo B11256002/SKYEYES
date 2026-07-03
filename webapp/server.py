@@ -3,6 +3,7 @@ from pathlib import Path
 
 from flask import Flask, Response, jsonify, request, send_from_directory
 
+from config import WEB_STREAM_FPS
 from webapp.runtime import SkyEyesRuntime
 
 
@@ -72,6 +73,8 @@ def create_app(runtime=None):
 
 
 def _frame_stream(runtime):
+    stream_interval = 1.0 / max(1, int(WEB_STREAM_FPS))
+
     while True:
         frame = runtime.get_frame()
 
@@ -83,6 +86,7 @@ def _frame_stream(runtime):
             b"--frame\r\n"
             b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n"
         )
+        time.sleep(stream_interval)
 
 
 if __name__ == "__main__":

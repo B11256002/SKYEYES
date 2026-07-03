@@ -1,4 +1,5 @@
 import cv2
+import time
 
 from config import *
 from camera.receiver import CameraReceiver
@@ -61,32 +62,45 @@ def main():
     print(f"YOLO device: {YOLO_DEVICE}")
     print(f"YOLO image size: {YOLO_IMAGE_SIZE}")
     print(f"YOLO half precision: {YOLO_HALF}")
+    print(f"Vision process interval: {VISION_PROCESS_INTERVAL}")
+    print(f"Runtime target FPS: {RUNTIME_TARGET_FPS}")
     print(f"Frame width: {FRAME_WIDTH}")
     print(f"Realtime video playback: {VIDEO_REALTIME_PLAYBACK}")
     print(f"Stabilization enabled: {STABILIZATION_ENABLED}")
     print(f"ESP32 status: {esp32_status.message}")
 
+    frame_index = 0
+    process_interval = max(1, int(VISION_PROCESS_INTERVAL))
+    target_interval = 1.0 / max(1, int(RUNTIME_TARGET_FPS))
+    detections = []
+    landmarks = []
+
     while True:
+        loop_started = time.time()
         frame = camera.read()
 
         if frame is None:
             break
 
+        frame_index += 1
+        should_process = frame_index == 1 or (frame_index - 1) % process_interval == 0
+
         frame = stabilizer.stabilize(frame)
 
-        detections = detector.detect(frame)
+        if should_process:
+            detections = detector.detect(frame)
 
-        detections = tracker.update(detections)
+            detections = tracker.update(detections)
 
-        detections = boundary.update(detections)
+            detections = boundary.update(detections)
 
-        landmarks = landmark_detector.detect(frame)
+            landmarks = landmark_detector.detect(frame)
 
-        alarm_events = alarm_manager.update(detections)
+            alarm_events = alarm_manager.update(detections)
 
-        for event in alarm_events:
-            print(event.message)
-            esp32.send(make_command("ALARM", event.message))
+            for event in alarm_events:
+                print(event.message)
+                esp32.send(make_command("ALARM", event.message))
 
         fps = fps_counter.get()
         latest_alarm = "\u7121\u8b66\u5831"
@@ -117,6 +131,11 @@ def main():
 
         if cv2.waitKey(1) == ord("q"):
             break
+
+        elapsed = time.time() - loop_started
+
+        if elapsed < target_interval:
+            time.sleep(target_interval - elapsed)
 
     camera.release()
     esp32.close()

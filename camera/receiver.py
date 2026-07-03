@@ -1,4 +1,5 @@
 import time
+from pathlib import Path
 
 import cv2
 
@@ -14,6 +15,7 @@ class CameraReceiver:
         self.source_fps = self.cap.get(cv2.CAP_PROP_FPS) or 0
         self.frame_index = 0
         self.start_time = None
+        self.is_file_source = self._is_file_source(source)
 
         if not self.cap.isOpened():
             raise Exception(f"Cannot open source: {source}")
@@ -36,7 +38,7 @@ class CameraReceiver:
         self.cap.release()
 
     def _sync_video_time(self):
-        if not self.realtime or self.source_fps <= 1:
+        if not self.realtime or self.source_fps <= 1 or not self.is_file_source:
             return
 
         if self.start_time is None:
@@ -44,6 +46,12 @@ class CameraReceiver:
             return
 
         elapsed = time.time() - self.start_time
+        expected_time = self.frame_index / self.source_fps
+
+        if elapsed < expected_time:
+            time.sleep(expected_time - elapsed)
+            elapsed = time.time() - self.start_time
+
         target_index = int(elapsed * self.source_fps)
         frames_to_skip = target_index - self.frame_index
 
@@ -52,6 +60,17 @@ class CameraReceiver:
                 return
 
             self.frame_index += 1
+
+    def _is_file_source(self, source):
+        if isinstance(source, int):
+            return False
+
+        source_text = str(source)
+
+        if "://" in source_text:
+            return False
+
+        return Path(source_text).suffix != ""
 
     def _resize(self, frame):
         if self.frame_width is None:

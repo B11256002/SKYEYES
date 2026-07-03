@@ -137,23 +137,39 @@ class SkyEyesRuntime:
             )
             esp32_status = esp32.connect()
             fps_counter = FPS()
+            frame_index = 0
+            process_interval = max(1, int(VISION_PROCESS_INTERVAL))
+            target_interval = 1.0 / max(1, int(RUNTIME_TARGET_FPS))
+            detections = []
+            landmarks = []
+            stream_interval = 1.0 / max(1, int(WEB_STREAM_FPS))
+            last_stream_time = 0
 
             while not self.stop_event.is_set():
+                loop_started = time.time()
                 frame = camera.read()
 
                 if frame is None:
                     break
 
-                frame = stabilizer.stabilize(frame)
-                detections = detector.detect(frame)
-                detections = tracker.update(detections)
-                detections = boundary.update(detections)
-                landmarks = landmark_detector.detect(frame)
-                alarm_events = alarm_manager.update(detections)
+                frame_index += 1
+                should_process = (
+                    frame_index == 1
+                    or (frame_index - 1) % process_interval == 0
+                )
 
-                for event in alarm_events:
-                    esp32.send(make_command("ALARM", event.message))
-                    self._add_alarm(event.message)
+                frame = stabilizer.stabilize(frame)
+
+                if should_process:
+                    detections = detector.detect(frame)
+                    detections = tracker.update(detections)
+                    detections = boundary.update(detections)
+                    landmarks = landmark_detector.detect(frame)
+                    alarm_events = alarm_manager.update(detections)
+
+                    for event in alarm_events:
+                        esp32.send(make_command("ALARM", event.message))
+                        self._add_alarm(event.message)
 
                 fps = fps_counter.get()
                 latest_alarm = "\u7121\u8b66\u5831"
@@ -177,17 +193,28 @@ class SkyEyesRuntime:
                 overlay.draw(frame, detections)
                 overlay.draw_alarm(frame, alarm_manager.latest_event)
 
+                now = time.time()
+
+                with self.lock:
+                    self.status = status
+                    self.error = None
+
+                if now - last_stream_time < stream_interval:
+                    self._sleep_until_next_frame(loop_started, target_interval)
+                    continue
+
+                last_stream_time = now
                 ok, encoded = cv2.imencode(
                     ".jpg",
                     frame,
-                    [int(cv2.IMWRITE_JPEG_QUALITY), 82]
+                    [int(cv2.IMWRITE_JPEG_QUALITY), WEB_JPEG_QUALITY]
                 )
 
                 if ok:
                     with self.lock:
                         self.latest_jpeg = encoded.tobytes()
-                        self.status = status
-                        self.error = None
+
+                self._sleep_until_next_frame(loop_started, target_interval)
 
         except Exception as exc:
             with self.lock:
@@ -205,6 +232,12 @@ class SkyEyesRuntime:
             "time": time.strftime("%H:%M:%S"),
             "message": message,
         })
+
+    def _sleep_until_next_frame(self, loop_started, target_interval):
+        elapsed = time.time() - loop_started
+
+        if elapsed < target_interval:
+            time.sleep(target_interval - elapsed)
 
     def _build_source_config(self, mode, value=None):
         normalized_mode = (mode or "video").strip().lower()
